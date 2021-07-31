@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	require('../dbconnect.php');
 	if(!empty($_POST)){
 		if($_POST['name'] === ''){
 			$error['name'] = brank;
@@ -14,22 +15,32 @@
 			$error['password'] = brank;
 		}
 
-		$filename = $_FILES['image']['name'];
-		if(!empty($filename)){
-			$ext = substr($filename, -3);
+		$fileName = $_FILES['image']['name'];
+		if(!empty($fileName)){
+			$ext = substr($fileName, -3);
 			if($ext != 'jpg' && $ext != 'png'){
 				$error['image'] = 'type';
 			}
 		}
 		
 		if(empty($error)) {
-			$image = date('YmdHis') . $_FILES['image']['name'];
-			move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/' . $image);
-			$_SESSION['join']['image'] = $image;
+			$member = $db -> prepare('SELECT COUNT(*) AS cnt FROM members WHERE email=?');
+			$member -> execute(array($_POST['email']));
+			$record = $member -> fetch();
+			if($record['cnt'] > 0) {
+				$error['email'] = 'duplicate';
+			}
+		}
+		
+		if(empty($error)) {
+			$image = date('YmdHis').$_FILES["image"]["name"];
+			var_dump(move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/'.$image));
 			$_SESSION['join'] = $_POST;
+			$_SESSION['join']['image'] = $image;
 			header('Location: check.php');
 			exit();
 		}
+
 	}
 	if($_REQUEST['action'] == 'rewrite') {
 		$_POST = $_SESSION['join'];
@@ -51,7 +62,6 @@
 <div id="head">
 <h1>会員登録</h1>
 </div>
-
 <div id="content">
 <p>次のフォームに必要事項をご記入ください。</p>
 <form action="" method="post" enctype="multipart/form-data">
@@ -67,6 +77,9 @@
 		<dt>メールアドレス<span class="required">必須</span></dt>
 		<?php if($error['email'] === brank): ?>
 		<p class="error">*メールアドレスが入力されていません</p>
+		<?php endif; ?>
+		<?php if($error['email'] === 'duplicate'): ?>
+		<p class="error">*そのメールアドレスは、既に使用されています</p>
 		<?php endif; ?>
 		<dd>
         	<input type="text" name="email" size="35" maxlength="255" value="<?php print($_POST['email']) ?>" />
@@ -85,6 +98,9 @@
         	<input type="file" name="image" size="35" value="test"  />
 			<?php if($error['image'] === 'type'): ?>
 			<p class="error">*拡張子エラーです</p>
+			<?php endif; ?>
+			<?php if(!empty($error)): ?>
+			<p class="error">*もう一度入力お願いします</p>
 			<?php endif; ?>
         </dd>
 	</dl>
