@@ -14,19 +14,19 @@
 			$error['password'] = brank;
 		}
 
-		$filename = $_FILES['image']['name'];
-		if(!empty($filename)){
-			$ext = substr($filename, -3);
+		$fileName = $_FILES['image']['name'];
+		if(!empty($fileName)){
+			$ext = substr($fileName, -3);
 			if($ext != 'jpg' && $ext != 'png'){
 				$error['image'] = 'type';
 			}
 		}
 		
 		if(empty($error)) {
-			$image = date('YmdHis') . $_FILES['image']['name'];
-			move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/' . $image);
-			$_SESSION['join']['image'] = $image;
+			$image = date('YmdHis').$_FILES["image"]["name"];
+			var_dump(move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/'.$image));
 			$_SESSION['join'] = $_POST;
+			$_SESSION['join']['image'] = $image;
 			header('Location: check.php');
 			exit();
 		}
@@ -51,7 +51,6 @@
 <div id="head">
 <h1>会員登録</h1>
 </div>
-
 <div id="content">
 <p>次のフォームに必要事項をご記入ください。</p>
 <form action="" method="post" enctype="multipart/form-data">
