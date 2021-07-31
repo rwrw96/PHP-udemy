@@ -58,8 +58,6 @@
 			<?php if($_SESSION['join']['image'] !== ''): ?> 
 				<img src="../member_picture/<?php print(htmlspecialchars($_SESSION['join']['image'], ENT_QUOTES)); ?>">
 			<?php endif; ?>
-			<?php print($_SESSION['join']['image']); ?> 
-			<?php print('test'); ?> 
 		</dd>
 	</dl>
 	<div><a href="index.php?action=rewrite">&laquo;&nbsp;書き直す</a> | <input type="submit" value="登録する" /></div>

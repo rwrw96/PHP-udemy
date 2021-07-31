@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	require('../dbconnect.php');
 	if(!empty($_POST)){
 		if($_POST['name'] === ''){
 			$error['name'] = brank;
@@ -23,6 +24,15 @@
 		}
 		
 		if(empty($error)) {
+			$member = $db -> prepare('SELECT COUNT(*) AS cnt FROM members WHERE email=?');
+			$member -> execute(array($_POST['email']));
+			$record = $member -> fetch();
+			if($record['cnt'] > 0) {
+				$error['email'] = 'duplicate';
+			}
+		}
+		
+		if(empty($error)) {
 			$image = date('YmdHis').$_FILES["image"]["name"];
 			var_dump(move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/'.$image));
 			$_SESSION['join'] = $_POST;
@@ -30,6 +40,7 @@
 			header('Location: check.php');
 			exit();
 		}
+
 	}
 	if($_REQUEST['action'] == 'rewrite') {
 		$_POST = $_SESSION['join'];
@@ -66,6 +77,9 @@
 		<dt>メールアドレス<span class="required">必須</span></dt>
 		<?php if($error['email'] === brank): ?>
 		<p class="error">*メールアドレスが入力されていません</p>
+		<?php endif; ?>
+		<?php if($error['email'] === 'duplicate'): ?>
+		<p class="error">*そのメールアドレスは、既に使用されています</p>
 		<?php endif; ?>
 		<dd>
         	<input type="text" name="email" size="35" maxlength="255" value="<?php print($_POST['email']) ?>" />
