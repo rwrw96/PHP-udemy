@@ -18,7 +18,7 @@ if(!empty($_POST)){
 
     if($member) {
       $_SESSION['id'] = $member['id'];
-      $_SESSION['time'] = time;
+      $_SESSION['time'] = time();
       
       if($_POST['save'] === 'on') {
         setcookie('email', $_POST['email'], time()+60*60*24*14);
@@ -59,6 +59,7 @@ if(!empty($_POST)){
       <dl>
         <dt>メールアドレス</dt>
         <dd>
+          <?php  print(var_dump($_SESSION['time'])); ?>
           <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($email); ?>" />
           <?php if($error['login'] === 'failed'): ?>
             <p class="error">正しく入力できていません</p>
