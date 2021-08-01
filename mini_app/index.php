@@ -78,10 +78,14 @@ if(isset($_REQUEST['res'])){
     <div class="msg">
     <img src="member_picture/<?php print($member['picture']); ?>" width="48" height="48" alt="<?php print($post['name']); ?>" />
     <p><?php print($post['message']); ?><span class="name">（<?php print($post['name']); ?>）</span>[<a href="index.php?res=<?php print($post['id']); ?>">Re</a>]</p>
-    <p class="day"><?php print($post['created']); ?><a href="view.php?id="></a>
-<a href="view.php?id=">返信元のメッセージ</a>
-[<a href="delete.php?id="
+    <p class="day"><a href="view.php?id=<?php print($post['id']); ?>"><?php print($post['created']); ?></a>
+    <?php if(!empty($post['repry_message_id'])): ?>
+<a href="view.php?id=<?php print($post['repry_message_id']); ?>">返信元のメッセージ</a>
+<?php endif; ?>
+<?php if($_SESSION['id'] === $post['member_id']): ?>
+[<a href="delete.php?id=<?php print($post['id']); ?>"
 style="color: #F33;">削除</a>]
+<?php endif; ?>
     </p>
     </div>
     <?php endforeach; ?>
