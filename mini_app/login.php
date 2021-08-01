@@ -1,3 +1,40 @@
+<?php 
+session_start();
+require('dbconnect.php');
+
+if($_COOKIE['email'] !== ''){
+  $email = $_COOKIE['email'];
+}
+
+if(!empty($_POST)){
+  $email = $_POST['email'];
+  if($_POST['email'] !== '' && $_POST['password'] !== '') {
+    $login = $db -> prepare('SELECT * FROM members WHERE email=? AND password=?');
+    $login -> execute(array(
+      $_POST['email'],
+      sha1($_POST['password'])
+    ));
+    $member = $login -> fetch();
+
+    if($member) {
+      $_SESSION['id'] = $member['id'];
+      $_SESSION['time'] = time();
+      
+      if($_POST['save'] === 'on') {
+        setcookie('email', $_POST['email'], time()+60*60*24*14);
+      }
+
+      header('Location: index.php');
+      exit();
+    } else {
+      $error['login'] = 'failed';
+    }
+  } else {
+  $error['login'] = 'blank';
+  }
+}
+?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -22,7 +59,14 @@
       <dl>
         <dt>メールアドレス</dt>
         <dd>
-          <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['email']); ?>" />
+          <?php  print(var_dump($_SESSION['time'])); ?>
+          <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($email); ?>" />
+          <?php if($error['login'] === 'failed'): ?>
+            <p class="error">正しく入力できていません</p>
+          <?php endif; ?>
+          <?php if($error['login'] === 'blank'): ?>
+            <p class="error">メールアドレスとパスワードをご記入ください</p>
+          <?php endif; ?>
         </dd>
         <dt>パスワード</dt>
         <dd>
