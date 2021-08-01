@@ -2,6 +2,9 @@
 session_start();
 require('dbconnect.php');
 
+
+
+
 if(isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time()){
   $_SESSION['time'] = time();
 
@@ -26,8 +29,24 @@ if(!empty($_POST)) {
   }
 }
 
-$posts = $db -> query('SELECT members.name, members.picture, posts.* FROM members, posts
-                      WHERE members.id = posts.member_id ORDER BY posts.created DESC');
+$page = $_REQUEST['page'];
+
+if($page == '') {
+  $page = 1;
+}
+$page = max($page, 1);
+
+$counts = $db -> query('SELECT COUNT(*) AS cnt FROM posts');
+$cnt = $counts -> fetch();
+$maxpage = ceil($cnt['cnt'] / 5);
+$page = min($page , $maxpage);
+
+$start = ($page -1) * 5;
+$posts = $db -> prepare('SELECT members.name, members.picture, posts.* FROM members, posts
+                      WHERE members.id = posts.member_id ORDER BY posts.created DESC LIMIT ?,5');
+
+$posts -> bindparam(1, $start, PDO::PARAM_INT);
+$posts -> execute();
 
 if(isset($_REQUEST['res'])){
   $response = $db -> prepare('SELECT members.name, members.picture, posts.* FROM members, posts
@@ -91,8 +110,12 @@ style="color: #F33;">削除</a>]
     <?php endforeach; ?>
 
 <ul class="paging">
-<li><a href="index.php?page=">前のページへ</a></li>
-<li><a href="index.php?page=">次のページへ</a></li>
+  <?php if($page > 1): ?>
+<li><a href="index.php?page=<?php print($page - 1); ?>">前のページへ</a></li>
+<?php endif; ?>
+<?php if($page < $maxpage): ?>
+<li><a href="index.php?page=<?php print($page + 1); ?>">次のページへ</a></li>
+<?php endif; ?>
 </ul>
   </div>
 </div>
